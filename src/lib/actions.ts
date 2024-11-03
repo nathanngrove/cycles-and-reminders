@@ -6,6 +6,8 @@ import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as bcrypt from "bcrypt";
 import { DatabaseError } from "pg";
+import { createSession } from "./session";
+import { redirect } from "next/navigation";
 
 const loginSchema = z.object({
 	username: z
@@ -47,10 +49,9 @@ export async function login(prevState: any, formData: FormData) {
 			.where(eq(users.id, user[0].id))
 			.returning({ updatedId: users.id });
 		console.log(update[0].updatedId);
-		return {
-			code: "200",
-			message: `Successfully updated ${update[0].updatedId}`,
-		};
+
+		await createSession(String(update[0].updatedId));
+		redirect("/dashboard");
 	}
 
 	return { code: "400", message: "Enter a valid username and PIN." };

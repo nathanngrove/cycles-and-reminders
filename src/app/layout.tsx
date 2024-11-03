@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Link from "next/link";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
 	title: "Cycles and Reminders",
@@ -14,14 +14,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className="max-w-[80%] mx-auto">
-				<header className="flex justify-between items-center py-8">
-					<Link href="/" className="font-bold text-xl">
-						Cycles and Reminders
-					</Link>
-					<div className="size-[50px] bg-white rounded-full"></div>
-				</header>
-				{children}
+			<body className="max-w-[80%] mx-auto flex flex-col min-h-screen">
+				<Header />
+				<main className="flex-grow h-0">{children}</main>
 			</body>
 		</html>
 	);
