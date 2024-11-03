@@ -1,16 +1,15 @@
 import React from "react";
-import Form from "next/form";
 
-async function createReminder(formData: FormData) {
+async function createReminderAction(formData: FormData) {
 	"use server";
 	console.log(formData);
 }
 
 function CreateReminder() {
 	return (
-		<Form
+		<form
 			className="flex flex-col gap-4 max-w-[50%]"
-			action={createReminder}>
+			action={createReminderAction}>
 			<div className="flex flex-col gap-2">
 				<label htmlFor="reminder-name">Name of reminder</label>
 				<input
@@ -36,7 +35,7 @@ function CreateReminder() {
 				type="submit">
 				Create Reminder
 			</button>
-		</Form>
+		</form>
 	);
 }
 

@@ -3,15 +3,15 @@ import React from "react";
 
 type ButtonLinkProps = {
 	linkTo: string;
-	label: string;
+	children: React.ReactNode;
 };
 
-const ButtonLink = ({ linkTo, label }: ButtonLinkProps) => {
+const ButtonLink = ({ linkTo, children }: ButtonLinkProps) => {
 	return (
 		<Link
 			href={linkTo}
 			className="px-2 py-1 bg-green-500 text-white font-bold rounded-sm hover:bg-green-600">
-			{label}
+			{children}
 		</Link>
 	);
 };

@@ -1,11 +1,11 @@
 import ButtonLink from "@/components/ButtonLink";
-import Login from "./login/Login";
 
 export default function Home() {
 	return (
 		<div className="grid place-items-center gap-4">
-			<Login />
-			<ButtonLink linkTo="/create-reminder" label="Create Reminder" />
+			<ButtonLink linkTo="/create-account">Create account</ButtonLink>
+			<p>or</p>
+			<ButtonLink linkTo="/login">Log in</ButtonLink>
 		</div>
 	);
 }
