@@ -1,6 +1,7 @@
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
@@ -17,7 +18,9 @@ export async function createSession(userId: string) {
 }
 
 export async function deleteSession() {
+	"use server";
 	(await cookies()).delete("session");
+	redirect("/");
 }
 
 type SessionPayload = {

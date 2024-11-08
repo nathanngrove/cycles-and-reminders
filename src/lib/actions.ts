@@ -20,6 +20,18 @@ const loginSchema = z.object({
 	pin: z.string().length(4).regex(/[0-9]/).trim(),
 });
 
+const createUserSchema = z.object({
+	username: z
+		.string()
+		.min(4)
+		.max(24)
+		.regex(/^[a-zA-Z0-9]+$/)
+		.trim()
+		.toLowerCase(),
+	pin: z.string().length(4).regex(/[0-9]/).trim(),
+	confirmPin: z.string().length(4).regex(/[0-9]/).trim(),
+});
+
 export async function login(prevState: any, formData: FormData) {
 	const result = loginSchema.safeParse(Object.fromEntries(formData));
 
@@ -58,13 +70,16 @@ export async function login(prevState: any, formData: FormData) {
 }
 
 export async function create(prevState: any, formData: FormData) {
-	const result = loginSchema.safeParse(Object.fromEntries(formData));
+	const result = createUserSchema.safeParse(Object.fromEntries(formData));
 	if (!result.success) {
 		console.log(result.error.flatten().fieldErrors);
 		return { code: "400", message: "Enter a valid username and PIN." };
 	}
 
-	const { username, pin } = result.data;
+	const { username, pin, confirmPin } = result.data;
+
+	if (pin !== confirmPin)
+		return { code: "400", message: "PINs do not match." };
 
 	try {
 		const hashedPin = await bcrypt.hash(pin, 10);
@@ -72,17 +87,14 @@ export async function create(prevState: any, formData: FormData) {
 			.insert(users)
 			.values({ username, pin: hashedPin })
 			.returning({ insertedUser: users.id });
-		return {
-			code: "200",
-			message: `Successfully created ${user[0].insertedUser}`,
-		};
+
+		await createSession(String(user[0].insertedUser));
 	} catch (e) {
 		if (e instanceof DatabaseError) {
 			if (e.code === "23505") {
 				return {
 					code: e.code,
-					message:
-						"Username is already taken. If you wish to log in, click the Login here link below.",
+					message: "Username is already taken.",
 				};
 			}
 			return {
@@ -90,7 +102,9 @@ export async function create(prevState: any, formData: FormData) {
 				message: e.message,
 			};
 		} else {
+			console.log(e);
 			return { code: "500", message: "INTERNAL SERVER ERROR" };
 		}
 	}
+	redirect("/dashboard");
 }
