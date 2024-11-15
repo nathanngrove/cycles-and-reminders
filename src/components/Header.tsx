@@ -1,7 +1,7 @@
 import getUser from "@/lib/getUser";
 import Link from "next/link";
 import React from "react";
-import ProfileDropDownMenu from "./ProfileDropDownMenu";
+import ProfileDropDown from "./ProfileDropDown";
 import LoginButton from "./LoginButton";
 import { deleteSession } from "@/lib/session";
 
@@ -14,7 +14,7 @@ async function Header() {
 				Cycles and Reminders
 			</Link>
 			{user ? (
-				<ProfileDropDownMenu {...user} deleteSession={deleteSession} />
+				<ProfileDropDown {...user} deleteSession={deleteSession} />
 			) : (
 				<LoginButton />
 			)}
