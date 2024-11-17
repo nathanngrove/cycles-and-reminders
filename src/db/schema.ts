@@ -1,6 +1,6 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
-import { pgEnum, pgTable as table } from "drizzle-orm/pg-core";
+import { pgTable as table } from "drizzle-orm/pg-core";
 
 export const users = table("users", {
 	id: t.integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -15,8 +15,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const reminders = table("reminders", {
-	id: t.integer().primaryKey(),
-	user_id: t.integer().notNull(),
+	id: t.serial("id").primaryKey(),
+	userId: t.integer().notNull(),
 	name: t.varchar({ length: 255 }).notNull(),
 	frequency: t.integer().notNull(),
 	createdAt: t.timestamp().defaultNow().notNull(),
@@ -26,7 +26,7 @@ export const reminders = table("reminders", {
 
 export const remindersRelations = relations(reminders, ({ one }) => ({
 	author: one(users, {
-		fields: [reminders.user_id],
+		fields: [reminders.userId],
 		references: [users.id],
 	}),
 }));

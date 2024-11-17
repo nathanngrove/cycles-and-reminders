@@ -1,6 +1,6 @@
 import React, { createContext, RefObject, useRef } from "react";
 
-type DropDownContextProps = {
+type PopoverContextProps = {
 	children: React.ReactNode;
 };
 
@@ -8,7 +8,7 @@ export const PopoverContext = createContext<RefObject<HTMLUListElement> | null>(
 	null
 );
 
-function DropDownContext({ children }: DropDownContextProps) {
+function PopoverContextProvider({ children }: PopoverContextProps) {
 	const popover = useRef<HTMLUListElement>(null);
 
 	return (
@@ -18,4 +18,4 @@ function DropDownContext({ children }: DropDownContextProps) {
 	);
 }
 
-export default DropDownContext;
+export default PopoverContextProvider;

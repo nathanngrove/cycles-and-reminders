@@ -1,15 +1,15 @@
 import Link from "next/link";
 import React, { useContext } from "react";
-import { PopoverContext } from "./DropDownContext";
+import { PopoverContext } from "./PopoverContext";
 import { twMerge } from "tailwind-merge";
 
-type DropDownLinkProps = {
+type PopoverLinkProps = {
 	children: React.ReactNode;
 	href: string;
 	className?: string;
 };
 
-function DropDownLink({ children, href, className }: DropDownLinkProps) {
+function PopoverLink({ children, href, className }: PopoverLinkProps) {
 	const popover = useContext(PopoverContext);
 
 	return (
@@ -28,13 +28,13 @@ function DropDownLink({ children, href, className }: DropDownLinkProps) {
 	);
 }
 
-type DropDownButtonProps = {
+type PopoverButtonProps = {
 	children: React.ReactNode;
 	onClick: () => void;
 	className?: string;
 };
 
-function DropDownButton({ children, onClick, className }: DropDownButtonProps) {
+function PopoverButton({ children, onClick, className }: PopoverButtonProps) {
 	const popover = useContext(PopoverContext);
 
 	return (
@@ -51,4 +51,4 @@ function DropDownButton({ children, onClick, className }: DropDownButtonProps) {
 	);
 }
 
-export { DropDownLink, DropDownButton };
+export { PopoverLink, PopoverButton };

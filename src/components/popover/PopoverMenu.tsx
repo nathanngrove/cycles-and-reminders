@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
-import { PopoverContext } from "./DropDownContext";
+import { PopoverContext } from "./PopoverContext";
 
-type DropDownMenuProps = {
+type PopoverMenuProps = {
 	children: React.ReactNode;
 	name: string;
 	className?: string;
 };
 
-function DropDownMenu({ children, name, className }: DropDownMenuProps) {
+function PopoverMenu({ children, name, className }: PopoverMenuProps) {
 	const popover = useContext(PopoverContext);
 
 	return (
@@ -17,4 +17,4 @@ function DropDownMenu({ children, name, className }: DropDownMenuProps) {
 	);
 }
 
-export default DropDownMenu;
+export default PopoverMenu;

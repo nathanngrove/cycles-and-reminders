@@ -1,13 +1,14 @@
 "use server";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { reminders, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import * as bcrypt from "bcrypt";
 import { DatabaseError } from "pg";
 import { createSession } from "./session";
 import { redirect } from "next/navigation";
+import getUser from "./getUser";
 
 const loginSchema = z.object({
 	username: z
@@ -107,4 +108,61 @@ export async function create(prevState: any, formData: FormData) {
 		}
 	}
 	redirect("/dashboard");
+}
+
+export async function createReminder(prevState: any, formData: FormData) {
+	const user = await getUser();
+	if (!user) {
+		return {
+			code: "401",
+			message: "You must be logged in to create a reminder.",
+		};
+	}
+
+	const reminderName = formData.get("name");
+	const reminderFrequency = formData.get("time");
+
+	if (!reminderName || !reminderFrequency) {
+		return {
+			code: "400",
+			message: "You must provide a name and frequency for your reminder.",
+		};
+	}
+
+	try {
+		const addReminder = await db
+			.insert(reminders)
+			.values({
+				frequency: Number(reminderFrequency),
+				name: String(reminderName),
+				userId: user.id,
+			})
+			.returning({ addedReminder: reminders.id });
+	} catch (e) {
+		if (e instanceof DatabaseError) {
+			return {
+				code: e.code === undefined ? "400" : e.code,
+				message: e.message,
+			};
+		} else {
+			console.log(e);
+			return { code: "500", message: "INTERNAL SERVER ERROR" };
+		}
+	}
+	redirect("/dashboard");
+}
+
+export async function getAllReminders() {
+	"use server";
+	const user = await getUser();
+	if (!user) {
+		redirect("/login");
+	}
+
+	const allReminders = await db
+		.select()
+		.from(reminders)
+		.where(eq(reminders.userId, user.id));
+
+	return allReminders;
 }

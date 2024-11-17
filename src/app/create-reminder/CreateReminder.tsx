@@ -1,21 +1,21 @@
-import React from "react";
+"use client";
 
-async function createReminderAction(formData: FormData) {
-	"use server";
-	console.log(formData);
-}
+import { createReminder } from "@/lib/actions";
+import React, { useActionState } from "react";
 
 function CreateReminder() {
+	const [state, createAction, pending] = useActionState(
+		createReminder,
+		undefined
+	);
+
 	return (
-		<form
-			className="flex flex-col gap-4 max-w-[50%]"
-			action={createReminderAction}>
+		<form className="flex flex-col gap-4 max-w-[50%]" action={createAction}>
 			<div className="flex flex-col gap-2">
 				<label htmlFor="reminder-name">Name of reminder</label>
 				<input
 					type="text"
 					name="name"
-					id="reminder-name"
 					className="p-2 rounded-sm bg-gray-700 focus:outline-gray-900"
 				/>
 			</div>
@@ -26,7 +26,6 @@ function CreateReminder() {
 				<input
 					type="text"
 					name="time"
-					id="reminder-time"
 					className="p-2 rounded-sm bg-gray-700 focus:outline-gray-900"
 				/>
 			</div>

@@ -1,17 +1,17 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
-type DropDownToggleProps = {
+type PopoverToggleProps = {
 	children: React.ReactNode;
 	targetName: string;
 	className?: string;
 };
 
-function DropDownToggle({
+function PopoverToggle({
 	children,
 	targetName,
 	className,
-}: DropDownToggleProps) {
+}: PopoverToggleProps) {
 	return (
 		<button
 			popoverTarget={targetName}
@@ -24,4 +24,4 @@ function DropDownToggle({
 	);
 }
 
-export default DropDownToggle;
+export default PopoverToggle;

@@ -1,9 +1,9 @@
 import getUser from "@/lib/getUser";
 import Link from "next/link";
 import React from "react";
-import ProfileDropDown from "./ProfileDropDown";
-import LoginButton from "./LoginButton";
+import ProfileDropDownMenu from "./ProfileDropDownMenu";
 import { deleteSession } from "@/lib/session";
+import ButtonLink from "./ButtonLink";
 
 async function Header() {
 	const user = await getUser();
@@ -14,9 +14,9 @@ async function Header() {
 				Cycles and Reminders
 			</Link>
 			{user ? (
-				<ProfileDropDown {...user} deleteSession={deleteSession} />
+				<ProfileDropDownMenu {...user} deleteSession={deleteSession} />
 			) : (
-				<LoginButton />
+				<ButtonLink linkTo="/login">Log in</ButtonLink>
 			)}
 		</header>
 	);
