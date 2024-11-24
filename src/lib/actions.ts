@@ -3,35 +3,12 @@
 import { db } from "@/db";
 import { reminders, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { z } from "zod";
 import * as bcrypt from "bcrypt";
 import { DatabaseError } from "pg";
 import { createSession } from "./session";
 import { redirect } from "next/navigation";
 import getUser from "./getUser";
-
-const loginSchema = z.object({
-	username: z
-		.string()
-		.min(4)
-		.max(24)
-		.regex(/^[a-zA-Z0-9]+$/)
-		.trim()
-		.toLowerCase(),
-	pin: z.string().length(4).regex(/[0-9]/).trim(),
-});
-
-const createUserSchema = z.object({
-	username: z
-		.string()
-		.min(4)
-		.max(24)
-		.regex(/^[a-zA-Z0-9]+$/)
-		.trim()
-		.toLowerCase(),
-	pin: z.string().length(4).regex(/[0-9]/).trim(),
-	confirmPin: z.string().length(4).regex(/[0-9]/).trim(),
-});
+import { loginSchema, createUserSchema } from "./zodSchemas";
 
 export async function login(prevState: any, formData: FormData) {
 	const result = loginSchema.safeParse(Object.fromEntries(formData));
@@ -130,7 +107,7 @@ export async function createReminder(prevState: any, formData: FormData) {
 	}
 
 	try {
-		const addReminder = await db
+		await db
 			.insert(reminders)
 			.values({
 				frequency: Number(reminderFrequency),
@@ -153,7 +130,6 @@ export async function createReminder(prevState: any, formData: FormData) {
 }
 
 export async function getAllReminders() {
-	"use server";
 	const user = await getUser();
 	if (!user) {
 		redirect("/login");
@@ -165,4 +141,38 @@ export async function getAllReminders() {
 		.where(eq(reminders.userId, user.id));
 
 	return allReminders;
+}
+
+export async function startReminder(id: number) {
+	const user = await getUser();
+	if (user === undefined) {
+		redirect("/login");
+	}
+
+	const reminder = await db.query.reminders.findFirst({
+		where: eq(reminders.userId, user.id) && eq(reminders.id, id),
+		columns: { frequency: true },
+	});
+
+	if (reminder === undefined) {
+		return { code: "400", message: "Reminder not found." };
+	}
+
+	const nextNotification = new Date(Date.now() + reminder!.frequency * 60000);
+
+	try {
+		await db
+			.update(reminders)
+			.set({ notificationAt: nextNotification })
+			.where(eq(reminders.userId, user.id) && eq(reminders.id, id))
+			.returning({ nextNoficationAt: reminders.notificationAt });
+
+		return {
+			code: "200",
+			message: "Reminder started.",
+		};
+	} catch (e) {
+		console.log(e);
+		return { code: "500", message: "INTERNAL SERVER ERROR" };
+	}
 }

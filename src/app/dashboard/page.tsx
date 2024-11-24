@@ -1,6 +1,6 @@
 import CreateButton from "@/components/CreateButton";
 import Tile from "@/components/Tile";
-import { getAllReminders } from "@/lib/actions";
+import { getAllReminders, startReminder } from "@/lib/actions";
 import React from "react";
 
 async function Dashboard() {
@@ -18,6 +18,8 @@ async function Dashboard() {
 					<Tile
 						name={reminder.name}
 						frequency={reminder.frequency}
+						startReminder={startReminder}
+						id={reminder.id}
 						key={reminder.id}
 					/>
 				);
