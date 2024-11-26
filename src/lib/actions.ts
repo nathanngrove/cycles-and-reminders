@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { reminders, users } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import * as bcrypt from "bcrypt";
 import { DatabaseError } from "pg";
 import { createSession } from "./session";
@@ -138,7 +138,8 @@ export async function getAllReminders() {
 	const allReminders = await db
 		.select()
 		.from(reminders)
-		.where(eq(reminders.userId, user.id));
+		.where(eq(reminders.userId, user.id))
+		.orderBy(asc(reminders.id));
 
 	return allReminders;
 }
@@ -161,15 +162,18 @@ export async function startReminder(id: number) {
 	const nextNotification = new Date(Date.now() + reminder!.frequency * 60000);
 
 	try {
-		await db
+		const updatedInfo = await db
 			.update(reminders)
 			.set({ notificationAt: nextNotification })
 			.where(eq(reminders.userId, user.id) && eq(reminders.id, id))
-			.returning({ nextNoficationAt: reminders.notificationAt });
+			.returning({
+				id: reminders.id,
+				nextNoficationAt: reminders.notificationAt,
+			});
 
 		return {
 			code: "200",
-			message: "Reminder started.",
+			message: JSON.stringify(updatedInfo[0]),
 		};
 	} catch (e) {
 		console.log(e);
