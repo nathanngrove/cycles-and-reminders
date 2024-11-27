@@ -4,18 +4,29 @@ import { NotificationQueueContext } from "./notifications/NotificationQueueConte
 
 type TileProps = {
 	name: string;
-	frequency: number;
+	frequencyMinutes: number;
+	frequencySeconds: number;
 	id: number;
 	startReminder: (id: number) => Promise<{
 		code: string;
 		message: string;
 	}>;
+	stopReminder: (id: number) => Promise<{
+		code: string;
+		message: string;
+	}>;
 };
 
-function Tile({ name, frequency, startReminder, id }: TileProps) {
-	const { queue, addNotificationToQueue } = useContext(
-		NotificationQueueContext
-	);
+function Tile({
+	name,
+	frequencyMinutes,
+	frequencySeconds,
+	startReminder,
+	stopReminder,
+	id,
+}: TileProps) {
+	const { queue, addNotificationToQueue, removeNotificationFromQueue } =
+		useContext(NotificationQueueContext);
 
 	const [res, setRes] = useState<{
 		code: string;
@@ -39,20 +50,40 @@ function Tile({ name, frequency, startReminder, id }: TileProps) {
 		setRes(updated);
 	}
 
+	async function stop() {
+		const updated = await stopReminder(id);
+		const updatedObject: { id: number; nextNoficationAt: Date | null } =
+			JSON.parse(updated.message);
+		removeNotificationFromQueue(updatedObject.id);
+		console.log(queue);
+		setRes(updated);
+	}
+
 	return (
 		<div className="flex flex-col bg-neutral-700 aspect-video p-4 rounded-md lg:text-lg md:text-xl text-2xl">
 			<p className="flex-grow">{name}</p>
 			<div className="flex items-center">
-				<p className="flex-grow">
-					{frequency > 1
-						? `${frequency} minutes`
-						: `${frequency} minute`}
-				</p>
+				<div className="flex-grow">
+					<p>
+						{frequencyMinutes > 1
+							? `${frequencyMinutes} minutes`
+							: frequencyMinutes === 0
+							? null
+							: `${frequencyMinutes} minute`}
+					</p>
+					<p>
+						{frequencySeconds > 1
+							? `${frequencySeconds} seconds`
+							: frequencySeconds === 0
+							? null
+							: `${frequencySeconds} second`}
+					</p>
+				</div>
 				{queue.has(id) ? (
 					<button
 						className="text-neutral-200 hover:text-neutral-400"
-						onClick={async () => await start()}>
-						⏹
+						onClick={async () => await stop()}>
+						◼
 					</button>
 				) : (
 					<button

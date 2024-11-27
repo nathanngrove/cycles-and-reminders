@@ -5,10 +5,10 @@ import { reminders, users } from "@/db/schema";
 import { asc, eq, sql } from "drizzle-orm";
 import * as bcrypt from "bcrypt";
 import { DatabaseError } from "pg";
-import { createSession } from "./session";
+import { createSession, decrypt } from "./session";
 import { redirect } from "next/navigation";
-import getUser from "./getUser";
 import { loginSchema, createUserSchema } from "./zodSchemas";
+import { cookies } from "next/headers";
 
 export async function login(prevState: any, formData: FormData) {
 	const result = loginSchema.safeParse(Object.fromEntries(formData));
@@ -87,96 +87,22 @@ export async function create(prevState: any, formData: FormData) {
 	redirect("/dashboard");
 }
 
-export async function createReminder(prevState: any, formData: FormData) {
-	const user = await getUser();
-	if (!user) {
-		return {
-			code: "401",
-			message: "You must be logged in to create a reminder.",
-		};
-	}
-
-	const reminderName = formData.get("name");
-	const reminderFrequency = formData.get("time");
-
-	if (!reminderName || !reminderFrequency) {
-		return {
-			code: "400",
-			message: "You must provide a name and frequency for your reminder.",
-		};
-	}
-
+export default async function getUser() {
 	try {
-		await db
-			.insert(reminders)
-			.values({
-				frequency: Number(reminderFrequency),
-				name: String(reminderName),
-				userId: user.id,
+		const cookie = (await cookies()).get("session")?.value;
+		const session = await decrypt(cookie);
+
+		const user = await db
+			.select({
+				id: users.id,
+				username: users.username,
+				lastLoggedIn: users.lastLoggedIn,
 			})
-			.returning({ addedReminder: reminders.id });
+			.from(users)
+			.where(eq(users.id, Number(session?.userId)))
+			.limit(1);
+		return user[0];
 	} catch (e) {
-		if (e instanceof DatabaseError) {
-			return {
-				code: e.code === undefined ? "400" : e.code,
-				message: e.message,
-			};
-		} else {
-			console.log(e);
-			return { code: "500", message: "INTERNAL SERVER ERROR" };
-		}
-	}
-	redirect("/dashboard");
-}
-
-export async function getAllReminders() {
-	const user = await getUser();
-	if (!user) {
-		redirect("/login");
-	}
-
-	const allReminders = await db
-		.select()
-		.from(reminders)
-		.where(eq(reminders.userId, user.id))
-		.orderBy(asc(reminders.id));
-
-	return allReminders;
-}
-
-export async function startReminder(id: number) {
-	const user = await getUser();
-	if (user === undefined) {
-		redirect("/login");
-	}
-
-	const reminder = await db.query.reminders.findFirst({
-		where: eq(reminders.userId, user.id) && eq(reminders.id, id),
-		columns: { frequency: true },
-	});
-
-	if (reminder === undefined) {
-		return { code: "400", message: "Reminder not found." };
-	}
-
-	const nextNotification = new Date(Date.now() + reminder!.frequency * 60000);
-
-	try {
-		const updatedInfo = await db
-			.update(reminders)
-			.set({ notificationAt: nextNotification })
-			.where(eq(reminders.userId, user.id) && eq(reminders.id, id))
-			.returning({
-				id: reminders.id,
-				nextNoficationAt: reminders.notificationAt,
-			});
-
-		return {
-			code: "200",
-			message: JSON.stringify(updatedInfo[0]),
-		};
-	} catch (e) {
-		console.log(e);
-		return { code: "500", message: "INTERNAL SERVER ERROR" };
+		console.log("No user found.");
 	}
 }

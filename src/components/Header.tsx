@@ -1,9 +1,9 @@
-import getUser from "@/lib/getUser";
 import Link from "next/link";
 import React from "react";
 import ProfileDropDownMenu from "./ProfileDropDownMenu";
 import { deleteSession } from "@/lib/session";
 import ButtonLink from "./ButtonLink";
+import getUser from "@/lib/UserAccountActions";
 
 async function Header() {
 	const user = await getUser();

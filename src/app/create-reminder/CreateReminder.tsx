@@ -1,6 +1,7 @@
 "use client";
 
-import { createReminder } from "@/lib/actions";
+import Input from "@/components/Input";
+import { createReminder } from "@/lib/ReminderActions";
 import React, { useActionState } from "react";
 
 function CreateReminder() {
@@ -11,24 +12,10 @@ function CreateReminder() {
 
 	return (
 		<form className="flex flex-col gap-4 max-w-[50%]" action={createAction}>
-			<div className="flex flex-col gap-2">
-				<label htmlFor="reminder-name">Name of reminder</label>
-				<input
-					type="text"
-					name="name"
-					className="p-2 rounded-sm bg-gray-700 focus:outline-gray-900"
-				/>
-			</div>
-			<div className="flex flex-col gap-2">
-				<label htmlFor="reminder-time">
-					How often would you like to be reminded?
-				</label>
-				<input
-					type="text"
-					name="time"
-					className="p-2 rounded-sm bg-gray-700 focus:outline-gray-900"
-				/>
-			</div>
+			<Input label="Name of reminder" name="name" type="text" />
+			<p>How often would you like to be reminded?</p>
+			<Input label="Minutes" name="minutes" type="text" />
+			<Input label="Seconds" name="seconds" type="text" />
 			<button
 				className="px-2 py-1 bg-green-500 text-white font-bold rounded-sm hover:bg-green-600"
 				type="submit">
