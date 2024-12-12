@@ -11,23 +11,40 @@ export const users = table("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-	reminders: many(reminders),
+	usersToReminders: many(usersToReminders),
 }));
 
 export const reminders = table("reminders", {
 	id: t.serial("id").primaryKey(),
-	userId: t.integer().notNull(),
 	name: t.varchar({ length: 255 }).notNull(),
 	frequencyMinutes: t.integer().notNull(),
 	frequencySeconds: t.integer().notNull(),
+	repeatEnabled: t.boolean().default(false),
 	createdAt: t.timestamp().defaultNow().notNull(),
 	lastStartedAt: t.timestamp(),
 	notificationAt: t.timestamp(),
 });
 
-export const remindersRelations = relations(reminders, ({ one }) => ({
-	author: one(users, {
-		fields: [reminders.userId],
-		references: [users.id],
-	}),
+export const remindersRelations = relations(reminders, ({ many }) => ({
+	usersToReminders: many(usersToReminders),
 }));
+
+export const usersToReminders = table("usersToReminders", {
+	id: t.serial("id").primaryKey(),
+	userId: t.integer().notNull(),
+	reminderId: t.integer().notNull(),
+});
+
+export const usersToGroupsRelations = relations(
+	usersToReminders,
+	({ one }) => ({
+		reminder: one(reminders, {
+			fields: [usersToReminders.reminderId],
+			references: [reminders.id],
+		}),
+		user: one(users, {
+			fields: [usersToReminders.userId],
+			references: [users.id],
+		}),
+	})
+);
