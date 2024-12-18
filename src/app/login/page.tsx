@@ -5,7 +5,7 @@ import { login } from "../../lib/UserAccountActions";
 import Link from "next/link";
 import Input from "@/components/Input";
 
-function LoginForm() {
+function Page() {
 	const [state, loginAction, pending] = useActionState(login, undefined);
 
 	return (
@@ -34,4 +34,4 @@ function LoginForm() {
 	);
 }
 
-export default LoginForm;
+export default Page;

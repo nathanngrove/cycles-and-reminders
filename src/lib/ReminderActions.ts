@@ -1,6 +1,6 @@
 "use server";
 
-import { reminders } from "@/db/schema";
+import { reminders, usersToReminders } from "@/db/schema";
 import getUser from "./UserAccountActions";
 import { db } from "@/db";
 import { DatabaseError } from "pg";
@@ -32,15 +32,19 @@ export async function createReminder(prevState: any, formData: FormData) {
 	}
 
 	try {
-		await db
+		const createReminder = await db
 			.insert(reminders)
 			.values({
 				frequencySeconds: Number(reminderFrequencySeconds),
 				frequencyMinutes: Number(reminderFrequencyMinutes),
 				name: String(reminderName),
-				userId: user.id,
 			})
 			.returning({ addedReminder: reminders.id });
+
+		await db.insert(usersToReminders).values({
+			reminderId: createReminder[0].addedReminder,
+			userId: user.id,
+		});
 	} catch (e) {
 		if (e instanceof DatabaseError) {
 			return {
@@ -61,11 +65,19 @@ export async function getAllReminders() {
 		redirect("/login");
 	}
 
-	const allReminders = await db
-		.select()
-		.from(reminders)
-		.where(eq(reminders.userId, user.id))
-		.orderBy(asc(reminders.id));
+	const allReminders = await db.query.usersToReminders.findMany({
+		columns: {
+			createdAt: true,
+			id: true,
+			lastStartedAt: true,
+			notificationAt: true,
+			repeatEnabled: true,
+		},
+		with: {
+			reminder: true,
+		},
+		orderBy: asc(usersToReminders.id),
+	});
 
 	return allReminders;
 }

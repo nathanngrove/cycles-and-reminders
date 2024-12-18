@@ -19,10 +19,7 @@ export const reminders = table("reminders", {
 	name: t.varchar({ length: 255 }).notNull(),
 	frequencyMinutes: t.integer().notNull(),
 	frequencySeconds: t.integer().notNull(),
-	repeatEnabled: t.boolean().default(false),
 	createdAt: t.timestamp().defaultNow().notNull(),
-	lastStartedAt: t.timestamp(),
-	notificationAt: t.timestamp(),
 });
 
 export const remindersRelations = relations(reminders, ({ many }) => ({
@@ -33,6 +30,10 @@ export const usersToReminders = table("usersToReminders", {
 	id: t.serial("id").primaryKey(),
 	userId: t.integer().notNull(),
 	reminderId: t.integer().notNull(),
+	repeatEnabled: t.boolean().default(false).notNull(),
+	createdAt: t.timestamp().defaultNow().notNull(),
+	lastStartedAt: t.timestamp(),
+	notificationAt: t.timestamp(),
 });
 
 export const usersToGroupsRelations = relations(

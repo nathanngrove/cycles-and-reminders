@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { reminders } from "@/db/schema";
+import { reminders, usersToReminders } from "@/db/schema";
 import getUser from "@/lib/UserAccountActions";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -12,9 +12,10 @@ export async function startReminder(id: number) {
 		redirect("/login");
 	}
 
-	const reminder = await db.query.reminders.findFirst({
-		where: eq(reminders.userId, user.id) && eq(reminders.id, id),
-		columns: { frequencyMinutes: true, frequencySeconds: true },
+	const reminder = await db.query.usersToReminders.findFirst({
+		where:
+			eq(usersToReminders.id, id) && eq(usersToReminders.userId, user.id),
+		with: { reminder: true },
 	});
 
 	if (reminder === undefined) {
@@ -23,18 +24,18 @@ export async function startReminder(id: number) {
 
 	const nextNotification = new Date(
 		Date.now() +
-			reminder.frequencyMinutes * 60000 +
-			reminder.frequencySeconds * 1000
+			reminder.reminder.frequencyMinutes * 60000 +
+			reminder.reminder.frequencySeconds * 1000
 	);
 
 	try {
 		const updatedInfo = await db
-			.update(reminders)
+			.update(usersToReminders)
 			.set({ notificationAt: nextNotification })
-			.where(eq(reminders.userId, user.id) && eq(reminders.id, id))
+			.where(eq(usersToReminders.id, id))
 			.returning({
-				id: reminders.id,
-				nextNoficationAt: reminders.notificationAt,
+				id: usersToReminders.id,
+				nextNoficationAt: usersToReminders.notificationAt,
 			});
 
 		return {
@@ -53,9 +54,10 @@ export async function stopReminder(id: number) {
 		redirect("/login");
 	}
 
-	const reminder = await db.query.reminders.findFirst({
-		where: eq(reminders.userId, user.id) && eq(reminders.id, id),
-		columns: { frequencyMinutes: true, frequencySeconds: true },
+	const reminder = await db.query.usersToReminders.findFirst({
+		where:
+			eq(usersToReminders.id, id) && eq(usersToReminders.userId, user.id),
+		with: { reminder: true },
 	});
 
 	if (reminder === undefined) {
@@ -64,12 +66,12 @@ export async function stopReminder(id: number) {
 
 	try {
 		const updatedInfo = await db
-			.update(reminders)
+			.update(usersToReminders)
 			.set({ notificationAt: null })
-			.where(eq(reminders.userId, user.id) && eq(reminders.id, id))
+			.where(eq(usersToReminders.id, id))
 			.returning({
-				id: reminders.id,
-				nextNoficationAt: reminders.notificationAt,
+				id: usersToReminders.id,
+				nextNoficationAt: usersToReminders.notificationAt,
 			});
 
 		return {

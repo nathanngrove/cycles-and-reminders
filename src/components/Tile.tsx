@@ -6,6 +6,7 @@ type TileProps = {
 	name: string;
 	frequencyMinutes: number;
 	frequencySeconds: number;
+	repeat: boolean;
 	id: number;
 	startReminder: (id: number) => Promise<{
 		code: string;
@@ -21,6 +22,7 @@ function Tile({
 	name,
 	frequencyMinutes,
 	frequencySeconds,
+	repeat,
 	startReminder,
 	stopReminder,
 	id,

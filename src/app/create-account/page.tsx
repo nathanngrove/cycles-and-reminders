@@ -4,7 +4,7 @@ import { create } from "../../lib/UserAccountActions";
 import Link from "next/link";
 import Input from "@/components/Input";
 
-function CreateAccount() {
+function Page() {
 	const [state, createAction, pending] = useActionState(create, undefined);
 
 	return (
@@ -32,4 +32,4 @@ function CreateAccount() {
 	);
 }
 
-export default CreateAccount;
+export default Page;

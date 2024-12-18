@@ -7,8 +7,8 @@ import Tile from "@/components/Tile";
 import { getAllReminders } from "@/lib/ReminderActions";
 import React from "react";
 
-async function Dashboard() {
-	const reminders = await getAllReminders();
+async function Page() {
+	const usersReminders = await getAllReminders();
 
 	return (
 		<div className="grid grid-cols-fluid gap-4">
@@ -17,17 +17,22 @@ async function Dashboard() {
 				<CreateButton />
 			</div>
 			<h2 className="text-3xl col-span-full">Reminders</h2>
-			{reminders.length !== 0 ? (
-				reminders.map((reminder) => {
+			{usersReminders.length !== 0 ? (
+				usersReminders.map((usersReminder) => {
 					return (
 						<Tile
-							name={reminder.name}
-							frequencyMinutes={reminder.frequencyMinutes}
-							frequencySeconds={reminder.frequencySeconds}
+							name={usersReminder.reminder.name}
+							frequencyMinutes={
+								usersReminder.reminder.frequencyMinutes
+							}
+							frequencySeconds={
+								usersReminder.reminder.frequencySeconds
+							}
+							repeat={usersReminder.repeatEnabled}
 							startReminder={startReminder}
 							stopReminder={stopReminder}
-							id={reminder.id}
-							key={reminder.id}
+							id={usersReminder.id}
+							key={usersReminder.id}
 						/>
 					);
 				})
@@ -46,4 +51,4 @@ async function Dashboard() {
 	);
 }
 
-export default Dashboard;
+export default Page;
